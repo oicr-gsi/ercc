@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "description": "Ercc workflow test",
+    "metrics_calculate": "calculate.sh",
+    "metrics_compare": "compare.sh",
+    "output_metrics_dir": "/.mounts/labs/gsi/testdata/ercc/output_metrics/",
+    "parameters": {
+          "wdl_options": {
+            "write_to_cache": false,
+            "read_from_cache": false
+           }
+         }
+  },
+  "tests": [
+    {
+      "id": "GCMS_0019_DoseRespose",
+      "parameters": {
+        "wdl_inputs": {
+          "ercc.outputFileNamePrefix": "TEST_GCMS_0019",
+          "ercc.mixId": "ERCC Mix 2",
+          "ercc.fastqR1": "/oicr/data/archive/seqware/seqware_analysis_12/hsqwprod/seqware-results/CASAVA_2.7.1/50259669/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R1_001.fastq.gz",
+          "ercc.fastqR2": "/oicr/data/archive/seqware/seqware_analysis_12/hsqwprod/seqware-results/CASAVA_2.7.1/50259669/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R2_001.fastq.gz"
+        }
+      }
+    }
+  ]
+}

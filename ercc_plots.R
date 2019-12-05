@@ -17,7 +17,6 @@
 #         HEIGHT[in pixels, optional. default=650] \
 #         
 # =============================================
-# /data/Projects/RKT1/ERCC_Controls_Analysis_v2.txt
 library(RColorBrewer)
 
 USAGE = list("Rscript ercc.R, order of arguments:\n","1. [Table with RPKMs]\n","2. [File with ERCC mix info]\n",
@@ -44,17 +43,12 @@ MIX2   = cmd_args[6]
 WIDTH  = 650
 HEIGHT = 650
 
-print(paste(WIDTH,HEIGHT,sep="\t"))
 # Image dimensions
 if (length(cmd_args) == 8) {
  WIDTH  = as.integer(cmd_args[7])
  HEIGHT = as.integer(cmd_args[8])
 }
-print(paste(WIDTH,HEIGHT,sep="\t"))
 TITLE = paste(PREFIX,TYPE,sep="_") 
-  
-CONTR<-read.table("/data/Projects/RKT1/ERCC_Controls_Analysis_v2.txt", header=TRUE, sep="\t", stringsAsFactors = FALSE)
-par(mfrow=c(1,1))
 
 # =======================
 #  Dose Response Plotting

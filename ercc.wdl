@@ -7,7 +7,6 @@ input {
   String? outputFileNamePrefix = basename(fastqR1, '.fastq.gz')
   String mixId
   String sampleId
-  File controlData
 }
 
 call countTotal {
@@ -40,6 +39,7 @@ call makeReport {
 output {
   File rpkmData = rpkmTable.rpkmTable
   File image = makeReport.reportImage
+  File json  = makeReport.reportJson
 }
 
 meta {
@@ -103,7 +103,6 @@ parameter_meta {
 }
 
 command <<<
-  module load ~{modules} 2>/dev/null
   bwa mem -t ~{threads} -M ~{refGenome} ~{fastqR1} ~{fastqR2} | samtools view -S - | \
       cut -f 3 | grep ERCC | sort | uniq -c | sed s/^\ *// > ~{cnv_file}
 >>>
@@ -124,10 +123,11 @@ output {
 # ===============================================
 task rpkmTable {
 input {
-  File? erccData = "/u/pruzanov/Projects/GCMS/ERCC/ERCC92.gtf"
   File erccCounts
   Int totalReads
-  Int? jobMemory  = 10
+  Int? jobMemory   = 10
+  String? modules  = "hg19-ercc/p13"
+  String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
 }
 
 command <<<
@@ -194,33 +194,30 @@ output {
 task makeReport {
 input {
   File rpkmTable
-  File controlData
-  String imagingScriptPath
+  String? imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
+  String? controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
+  String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
   String? prefix = "UnnamedReport"
   String samples
   String? Rscript = "$RSTATS_ROOT/bin/Rscript"
   Int? jobMemory = 10
-  Int? imageWidth  = 650
-  Int? imageHeight = 650
-  String? modules  = "rstats/3.6"
+  String? modules  = "rstats/3.6 ercc-scripts/1.0 hg19-ercc/p13"
 }
 
 # TODO: test with header-less rpkm table, assign columnames using passed arguments
 command <<<
- module load ~{modules} 2>/dev/null
- ~{Rscript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{prefix} DoseResponse ~{samples} ~{imageWidth} ~{imageHeight}
+ ~{Rscript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
 >>>
 
 parameter_meta {
   rpkmTable:  "Input file with RPKMshost .bam file"
   controlData: "ERCC supporting data"
+  erccData: "Reference file from Agilent"
   jobMemory: "Memory allocated to classify task"
   modules: "Names and versions of modules needed for making report"
   imagingScriptPath: "path to Rscript ercc_plots.R"
   prefix: "prefix to use with images"
   samples: "space-separated mix1 and mix2 samples"
-  imageWidth: "width of a report image in pixels, 650 is the default"
-  imageHeight: "height of a report image in pixels, 650 is the default"
 }
 
 runtime {
@@ -228,6 +225,7 @@ runtime {
 }
 
 output {
-  File reportImage  = "~{prefix}_DoseResponse.png"
+  File reportImage  = "~{prefix}_DoseResponse.pdf"
+  File reportJson   = "~{prefix}_rpkm.json"
 }
 }

@@ -1,6 +1,6 @@
 # =============================================
 #
-# Plots for 
+# Plots in PDF for 
 #
 # 1. dose response curve
 #
@@ -12,17 +12,12 @@
 #
 # Rscript ercc_plots.R data[RPKM table] contr[File with ERCC mix info] \
 #         prefix[prefix for image] type[DoseResponse or FoldDifference] \
-#         MIX1[id of sample with Mix1] MIX2[id of sample with Mix2] \
-#         WIDTH[in pixels, optional. default=650] \
-#         HEIGHT[in pixels, optional. default=650] \
+#         MIX1[id of sample with Mix1] MIX2[id of sample with Mix2] 
 #         
 # =============================================
-library(RColorBrewer)
-
 USAGE = list("Rscript ercc.R, order of arguments:\n","1. [Table with RPKMs]\n","2. [File with ERCC mix info]\n",
-"3. [prefix for image]\n","4. [DoseResponse or FoldDifference]\n","5. [id of sample with Mix1]\n",
-"6. [id of sample with Mix2]\n","7. [width in pixels, optional. default=650]\n",
-"8. [height in pixels, optional. default=650]\n")
+"3. [File with length of ERCC transcripts]\n","4. [prefix for image]\n","5. [DoseResponse or FoldDifference]\n","6. [id of sample with Mix1]\n","7. [id of sample with Mix2]\n")
+library(jsonlite)
 
 cmd_args = commandArgs(trailingOnly = TRUE);
 
@@ -33,22 +28,30 @@ if (length(cmd_args) < 6) {
   quit()
 }
 
-DATA<-read.table(cmd_args[1],header=T,check.names=FALSE)
+DATA<-read.table(cmd_args[1],header=F,check.names=FALSE)
 CONTR<-read.table(cmd_args[2], header=TRUE, sep="\t", stringsAsFactors = FALSE)
+GTF<-read.table(cmd_args[3], header=FALSE, sep="\t", stringsAsFactors = FALSE)
+colnames(GTF) = c("ERCC.ID","Class","Type","Start","Stop","Score","Strand","Phase","Info")
 par(mfrow=c(1,1))
-PREFIX = cmd_args[3]
-TYPE   = cmd_args[4] # DoseResponse or FoldChange
-MIX1   = cmd_args[5]
-MIX2   = cmd_args[6]
-WIDTH  = 650
-HEIGHT = 650
-
-# Image dimensions
-if (length(cmd_args) == 8) {
- WIDTH  = as.integer(cmd_args[7])
- HEIGHT = as.integer(cmd_args[8])
-}
+PREFIX = cmd_args[4]
+TYPE   = cmd_args[5] # DoseResponse or FoldChange
+MIX1   = cmd_args[6]
+MIX2   = cmd_args[7]
+SAMPLE = ifelse(MIX1 == "NA", MIX2, MIX1)
+colnames(DATA) = c("Feature", SAMPLE)
 TITLE = paste(PREFIX,TYPE,sep="_") 
+
+# ========================================
+#           Append ERCC length
+# ========================================
+DATA$Length = 0
+DATA<-DATA[,c(1,3,2)]
+
+for (f in unique(GTF$ERCC.ID)) {
+  if (any(DATA$Feature == f)) {
+    DATA[DATA$Feature == f,]$Length = GTF[GTF$ERCC.ID==f,]$Stop
+  }
+}
 
 # =======================
 #  Dose Response Plotting
@@ -107,7 +110,7 @@ plotDoseResponse<-function(DATA,mix1,mix2,MAIN) {
     }
   }
   
-  
+  print(dim(P)) 
   P[which(P$AMLOG==-Inf),2] = NA
   P[which(P$VCLOG==-Inf),3] = NA
   L<-with(P, lm(VCLOG~AMLOG))
@@ -115,7 +118,7 @@ plotDoseResponse<-function(DATA,mix1,mix2,MAIN) {
   abline(L$coefficients[1], L$coefficients[2] , col="red", lty = 2) # regression line (y~x)
   # 1 RPKM line:
   abline(h = 0, col="gray60", lty = 2)
-  R2<-cor(P$AMLOG,y=P$VCLOG, method = "pearson", use = "complete.obs")^2
+  R2<-cor(P$AMLOG, y=P$VCLOG, method = "pearson", use = "complete.obs")^2
   text(-5, 1, "1RPKM", cex = 1.1, pos = 4)
   text(-5, 9, paste("n = ", length(unique(P$Feature))), cex = 1.1, pos = 4)
   text(-5, 8, paste("R",toupper("2")," = ",round(R2,4),sep=""), cex = 1.1, pos = 4)
@@ -182,13 +185,16 @@ plotFoldChange<-function(DATA,mix1,mix2,MAIN="Fold Change Response") {
   
 }
 
+JSON<-toJSON(DATA, pretty=TRUE)
+write(JSON, paste0(PREFIX,"_rpkm.json"))
+
 if (TYPE == "DoseResponse") {
-  png(filename=paste0(TITLE,".png"),width=WIDTH,height=HEIGHT,units="px",pointsize=15,bg="white",type='cairo')
+  pdf(file = paste0(TITLE,".pdf"))
   plotDoseResponse(DATA,MIX1,MIX2,TITLE)
   dev.off()
   
 } else if (TYPE == "FoldDifference") {
-  png(filename=paste0(TITLE,".png"),width=WIDTH,height=HEIGHT,units="px",pointsize=15,bg="white",type='cairo')
+  pdf(file = paste0(TITLE,".pdf"))
   plotFoldChange(DATA,MIX1,MIX2,TITLE)
   dev.off()
 }

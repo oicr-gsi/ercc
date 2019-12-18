@@ -16,7 +16,7 @@
 #         
 # =============================================
 USAGE = list("Rscript ercc.R, order of arguments:\n","1. [Table with RPKMs]\n","2. [File with ERCC mix info]\n",
-"3. [File with length of ERCC transcripts]\n","4. [prefix for image]\n","5. [DoseResponse or FoldDifference]\n","6. [id of sample with Mix1]\n","7. [id of sample with Mix2]\n")
+"3. [File with length of ERCC transcripts, GTF]\n","4. [prefix for image]\n","5. [DoseResponse or FoldDifference]\n","6. [id of sample with Mix1]\n","7. [id of sample with Mix2]\n")
 library(jsonlite)
 
 cmd_args = commandArgs(trailingOnly = TRUE);
@@ -46,10 +46,21 @@ TITLE = paste(PREFIX,TYPE,sep="_")
 # ========================================
 DATA$Length = 0
 DATA<-DATA[,c(1,3,2)]
-
 for (f in unique(GTF$ERCC.ID)) {
   if (any(DATA$Feature == f)) {
     DATA[DATA$Feature == f,]$Length = GTF[GTF$ERCC.ID==f,]$Stop
+  }
+}
+
+# ========================================
+#           Append ERCC concentration
+# ========================================
+DATA$Concentration = 0.0
+
+for (f in unique(CONTR$ERCC.ID)) {
+  if (any(DATA$Feature == f)) {
+    DATA[DATA$Feature == f,]$Concentration = ifelse(MIX1 == "NA",CONTR[CONTR$ERCC.ID==f,]$concentration.in.Mix.2..attomoles.ul.,
+                                                                 CONTR[CONTR$ERCC.ID==f,]$concentration.in.Mix.1..attomoles.ul.)
   }
 }
 
@@ -86,7 +97,7 @@ plotDoseResponse<-function(DATA,mix1,mix2,MAIN) {
         POINTS$Am[which(POINTS$Feature == e)] = CONTR$concentration.in.Mix.1..attomoles.ul.[which(CONTR$ERCC.ID == e)]
       }
       POINTS$AMLOG<-log2(POINTS$Am)
-      POINTS$VCLOG<-log2(POINTS[,which(colnames(POINTS) == f)])
+      POINTS$VCLOG<-log2(POINTS[,which(colnames(DATA) == f)])
       points(POINTS[,5:6], col = "steelblue")
       P = POINTS[,c(1,5:6)]
     }
@@ -100,7 +111,7 @@ plotDoseResponse<-function(DATA,mix1,mix2,MAIN) {
         POINTS$Am[which(POINTS$Feature == e)] = CONTR$concentration.in.Mix.2..attomoles.ul.[which(CONTR$ERCC.ID == e)]
       }
       POINTS$AMLOG<-log2(POINTS$Am)
-      POINTS$VCLOG<-log2(POINTS[,which(colnames(POINTS) == f)])
+      POINTS$VCLOG<-log2(POINTS[,which(colnames(DATA) == f)])
       points(POINTS[,5:6], col = "salmon")
       if (!is.null(P)) {
         P<-rbind(P,POINTS[,c(1,5:6)])
@@ -185,8 +196,7 @@ plotFoldChange<-function(DATA,mix1,mix2,MAIN="Fold Change Response") {
   
 }
 
-JSON<-toJSON(DATA, pretty=TRUE)
-write(JSON, paste0(PREFIX,"_rpkm.json"))
+
 
 if (TYPE == "DoseResponse") {
   pdf(file = paste0(TITLE,".pdf"))
@@ -198,3 +208,8 @@ if (TYPE == "DoseResponse") {
   plotFoldChange(DATA,MIX1,MIX2,TITLE)
   dev.off()
 }
+
+DATA$Sample = colnames(DATA)[3]
+colnames(DATA)[3] = "rpkm"
+JSON<-toJSON(DATA, pretty=TRUE)
+write(JSON, paste0(PREFIX,"_rpkm.json"))

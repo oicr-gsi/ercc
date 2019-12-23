@@ -18,8 +18,8 @@
         "wdl_inputs": {
           "ercc.outputFileNamePrefix": "TEST_GCMS_0019",
           "ercc.mixId": "ERCC Mix 2",
-          "ercc.fastqR1": "/oicr/data/archive/seqware/seqware_analysis_12/hsqwprod/seqware-results/CASAVA_2.7.1/50259669/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R1_001.fastq.gz",
-          "ercc.fastqR2": "/oicr/data/archive/seqware/seqware_analysis_12/hsqwprod/seqware-results/CASAVA_2.7.1/50259669/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R2_001.fastq.gz",
+          "ercc.fastqR1": "/.mounts/labs/gsi/testdata/ercc/fastq/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R1_001.fastq.gz",
+          "ercc.fastqR2": "/.mounts/labs/gsi/testdata/ercc/fastq/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R2_001.fastq.gz",
           "ercc.sampleId": "GCMS_0019"
         }
       }

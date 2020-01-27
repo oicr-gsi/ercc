@@ -132,7 +132,8 @@ input {
 
 command <<<
  python <<CODE
- ercc = "~{erccData}"
+ import os
+ ercc = os.path.expandvars("~{erccData}")
  counts = "~{erccCounts}"
  total = ~{totalReads}
  output_file = "~{basename(erccCounts, '.csv')}_rpkm.csv"

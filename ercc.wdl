@@ -88,7 +88,7 @@ input {
   Int? jobMemory = 20
   Int? threads = 8
   String? refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
-  String? cnv_file = "ercc_counts.csv"
+  String cnv_file = "ercc_counts.csv"
   String? modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
 }
 
@@ -182,6 +182,7 @@ parameter_meta {
 
 runtime {
   memory:  "~{jobMemory} GB"
+  modules: "~{modules}"
 }
 
 output {
@@ -198,7 +199,7 @@ input {
   String? imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
   String? controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
   String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
-  String? prefix = "UnnamedReport"
+  String prefix = "UnnamedReport"
   String samples
   String? Rscript = "$RSTATS_ROOT/bin/Rscript"
   Int? jobMemory = 10
@@ -223,6 +224,7 @@ parameter_meta {
 
 runtime {
   memory:  "~{jobMemory} GB"
+  modules: "~{modules}"
 }
 
 output {

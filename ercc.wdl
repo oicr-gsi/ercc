@@ -201,14 +201,14 @@ input {
   String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
   String prefix = "UnnamedReport"
   String samples
-  String? Rscript = "$RSTATS_ROOT/bin/Rscript"
+  String? rScript = "$RSTATS_ROOT/bin/Rscript"
   Int? jobMemory = 10
   String? modules  = "rstats/3.6 ercc-scripts/1.0 hg19-ercc/p13"
 }
 
 # TODO: test with header-less rpkm table, assign columnames using passed arguments
 command <<<
- ~{Rscript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
+ ~{rScript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
 >>>
 
 parameter_meta {
@@ -217,7 +217,8 @@ parameter_meta {
   erccData: "Reference file from Agilent"
   jobMemory: "Memory allocated to classify task"
   modules: "Names and versions of modules needed for making report"
-  imagingScriptPath: "path to Rscript ercc_plots.R"
+  imagingScriptPath: "path to R script ercc_plots.R"
+  rScript: "Path to Rscript command"
   prefix: "prefix to use with images"
   samples: "space-separated mix1 and mix2 samples"
 }

@@ -88,7 +88,7 @@ input {
   Int? jobMemory = 20
   Int? threads = 8
   String? refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
-  String? cnv_file = "ercc_counts.csv"
+  String cnv_file = "ercc_counts.csv"
   String? modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
 }
 
@@ -132,7 +132,8 @@ input {
 
 command <<<
  python <<CODE
- ercc = "~{erccData}"
+ import os
+ ercc = os.path.expandvars("~{erccData}")
  counts = "~{erccCounts}"
  total = ~{totalReads}
  output_file = "~{basename(erccCounts, '.csv')}_rpkm.csv"
@@ -181,6 +182,7 @@ parameter_meta {
 
 runtime {
   memory:  "~{jobMemory} GB"
+  modules: "~{modules}"
 }
 
 output {
@@ -197,16 +199,16 @@ input {
   String? imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
   String? controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
   String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
-  String? prefix = "UnnamedReport"
+  String prefix = "UnnamedReport"
   String samples
-  String? Rscript = "$RSTATS_ROOT/bin/Rscript"
+  String? rScript = "$RSTATS_ROOT/bin/Rscript"
   Int? jobMemory = 10
   String? modules  = "rstats/3.6 ercc-scripts/1.0 hg19-ercc/p13"
 }
 
 # TODO: test with header-less rpkm table, assign columnames using passed arguments
 command <<<
- ~{Rscript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
+ ~{rScript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
 >>>
 
 parameter_meta {
@@ -215,13 +217,15 @@ parameter_meta {
   erccData: "Reference file from Agilent"
   jobMemory: "Memory allocated to classify task"
   modules: "Names and versions of modules needed for making report"
-  imagingScriptPath: "path to Rscript ercc_plots.R"
+  imagingScriptPath: "path to R script ercc_plots.R"
+  rScript: "Path to Rscript command"
   prefix: "prefix to use with images"
   samples: "space-separated mix1 and mix2 samples"
 }
 
 runtime {
   memory:  "~{jobMemory} GB"
+  modules: "~{modules}"
 }
 
 output {

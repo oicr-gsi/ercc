@@ -203,8 +203,28 @@ if (TYPE == "DoseResponse") {
   plotDoseResponse(DATA,MIX1,MIX2,TITLE)
   dev.off()
   
+  png(filename = paste0(TITLE,".png"), 
+      width  = 650, 
+      height = 650,
+      units = "px",
+      pointsize = 12,
+      type = "cairo",
+      bg = "white")
+  plotDoseResponse(DATA,MIX1,MIX2,TITLE)
+  dev.off()
+  
 } else if (TYPE == "FoldDifference") {
   pdf(file = paste0(TITLE,".pdf"))
+  plotFoldChange(DATA,MIX1,MIX2,TITLE)
+  dev.off()
+  
+  png(filename = paste0(TITLE,".png"), 
+      width  = 650, 
+      height = 650,
+      units = "px",
+      pointsize = 12,
+      type = "cairo",
+      bg = "white")
   plotFoldChange(DATA,MIX1,MIX2,TITLE)
   dev.off()
 }

@@ -39,13 +39,34 @@ call makeReport {
 output {
   File rpkmData = rpkmTable.rpkmTable
   File image = makeReport.reportImage
+  File pdf   = makeReport.reportPdf
   File json  = makeReport.reportJson
 }
 
 meta {
     author: "Peter Ruzanov"
     email: "peter.ruzanov@oicr.on.ca"
-    description: "Ercc 1.0"
+    description: "Ercc 1.1"
+    dependencies: [
+      {
+        name: "rstats-cairo/3.6",
+        url: "https://www.r-project.org/"
+      },
+      {
+        name: "bwa/0.7.17",
+        url: "http://bio-bwa.sourceforge.net/"
+      },
+      {
+        name: "samtools/0.1.19",
+        url: "http://www.htslib.org/"
+      }
+    ]
+    output_meta: {
+      rpkmData: "ERCC readouts in RPKMs",
+      image: "png with a plot (Dose Response supported at the moment)",
+      pdf: "pdf with the same plot as png, a legacy output",
+      json: "json file with ERCC numbers"
+    }
 }
 
 }
@@ -56,11 +77,12 @@ meta {
 task countTotal {
 input {
   File fastqR1
-  Int? jobMemory = 8
+  Int jobMemory = 8
 }
 
 parameter_meta {
   fastqR1: "Read 1 fastq file, we report the number of reads in it"
+  jobMemory: "Memory allocated to this job"
 }
 
 command <<<
@@ -85,8 +107,8 @@ task countTranscripts {
 input {
   File fastqR1
   File? fastqR2
-  Int? jobMemory = 20
-  Int? threads = 8
+  Int jobMemory = 20
+  Int threads = 8
   String? refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
   String cnv_file = "ercc_counts.csv"
   String? modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
@@ -125,9 +147,17 @@ task rpkmTable {
 input {
   File erccCounts
   Int totalReads
-  Int? jobMemory   = 10
+  Int jobMemory   = 10
   String? modules  = "hg19-ercc/p13"
   String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
+}
+
+parameter_meta {
+  erccCounts: ".csv file with counts for ERCC transcripts"
+  totalReads: "Total reads fot current sample, used to calculate RPKMs" 
+  jobMemory: "Memory allocated to sort task"
+  modules: "Names and versions of modules needed for alignment"
+  erccData: "Reference file from Agilent"
 }
 
 command <<<
@@ -173,13 +203,6 @@ command <<<
  CODE
 >>>
 
-parameter_meta {
-  erccData: "Reference file from Agilent"
-  erccCounts: ".csv file with counts for ERCC transcripts"
-  totalReads: "Total reads fot current sample, used to calculate RPKMs" 
-  jobMemory: "Memory allocated to sort task"
-}
-
 runtime {
   memory:  "~{jobMemory} GB"
   modules: "~{modules}"
@@ -190,9 +213,9 @@ output {
 }
 }
 
-# =======================================
-#  TASK 4 of 4: make an image with R
-# =======================================
+# ===========================================
+#  TASK 4 of 4: make an image and json with R
+# ===========================================
 task makeReport {
 input {
   File rpkmTable
@@ -201,15 +224,10 @@ input {
   String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
   String prefix = "UnnamedReport"
   String samples
-  String? rScript = "$RSTATS_ROOT/bin/Rscript"
-  Int? jobMemory = 10
-  String? modules  = "rstats/3.6 ercc-scripts/1.0 hg19-ercc/p13"
+  String? rScript = "$RSTATS_CAIRO_ROOT/bin/Rscript"
+  Int jobMemory = 10
+  String? modules  = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"
 }
-
-# TODO: test with header-less rpkm table, assign columnames using passed arguments
-command <<<
- ~{rScript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
->>>
 
 parameter_meta {
   rpkmTable:  "Input file with RPKMshost .bam file"
@@ -223,13 +241,18 @@ parameter_meta {
   samples: "space-separated mix1 and mix2 samples"
 }
 
+command <<<
+ ~{rScript} ~{imagingScriptPath} ~{rpkmTable} ~{controlData} ~{erccData} ~{prefix} DoseResponse ~{samples}
+>>>
+
 runtime {
   memory:  "~{jobMemory} GB"
   modules: "~{modules}"
 }
 
 output {
-  File reportImage  = "~{prefix}_DoseResponse.pdf"
+  File reportPdf    = "~{prefix}_DoseResponse.pdf"
+  File reportImage  = "~{prefix}_DoseResponse.png"
   File reportJson   = "~{prefix}_rpkm.json"
 }
 }

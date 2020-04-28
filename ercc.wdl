@@ -46,7 +46,7 @@ output {
 meta {
     author: "Peter Ruzanov"
     email: "peter.ruzanov@oicr.on.ca"
-    description: "Ercc 1.1"
+    description: "Ercc 1.1, Niassa-wrapped Cromwell (widdle) workflow for running ERCC spike-in analysis on RNAseq data. The workflow counts total reads in fastq files, evaluate expression of ERCC spike-ins using bwa aligner and creates a report in .json format, along with plots in .png and .pdf formats. The .json file contains RPKMs for all ERCC transcripts as well as other information. RPKM table in .csv format is also provisioned."
     dependencies: [
       {
         name: "rstats-cairo/3.6",
@@ -109,9 +109,9 @@ input {
   File? fastqR2
   Int jobMemory = 20
   Int threads = 8
-  String? refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
+  String refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
   String cnv_file = "ercc_counts.csv"
-  String? modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
+  String modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
 }
 
 parameter_meta {
@@ -148,8 +148,8 @@ input {
   File erccCounts
   Int totalReads
   Int jobMemory   = 10
-  String? modules  = "hg19-ercc/p13"
-  String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
+  String modules  = "hg19-ercc/p13"
+  String erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
 }
 
 parameter_meta {
@@ -219,14 +219,14 @@ output {
 task makeReport {
 input {
   File rpkmTable
-  String? imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
-  String? controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
-  String? erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
+  String imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
+  String controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
+  String erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
   String prefix = "UnnamedReport"
   String samples
-  String? rScript = "$RSTATS_CAIRO_ROOT/bin/Rscript"
+  String rScript = "$RSTATS_CAIRO_ROOT/bin/Rscript"
   Int jobMemory = 10
-  String? modules  = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"
+  String modules  = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"
 }
 
 parameter_meta {

@@ -1,7 +1,4 @@
 # ercc
-workflow for analysis of samples with RNA spike-ins (ERCC)
-
-ercc workflow, analysis of spike-ins in RNA-seq data. The workflow counts total reads in fastq files, evaluate expression of ERCC spike-ins using bwa aligner and creates a report in pdf format. Workflow provisions .json file with rpkm information for all ERCC transcripts, .pdf with a plot and rpkm table in .csv format.
 
 ![ercc flowchart](docs/ercc_flowchart.png)
 

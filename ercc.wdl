@@ -78,10 +78,12 @@ task countTotal {
 input {
   File fastqR1
   Int jobMemory = 8
+  Int timeout = 20
 }
 
 parameter_meta {
   fastqR1: "Read 1 fastq file, we report the number of reads in it"
+  timeout: "Timeout in hours for this task"
   jobMemory: "Memory allocated to this job"
 }
 
@@ -91,6 +93,7 @@ command <<<
 
 runtime {
   memory:  "~{jobMemory} GB"
+  timeout: "~{timeout}"
 }
 
 output {
@@ -107,6 +110,7 @@ task countTranscripts {
 input {
   File fastqR1
   File? fastqR2
+  Int timeout = 20
   Int jobMemory = 20
   Int threads = 8
   String refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
@@ -119,6 +123,7 @@ parameter_meta {
   fastqR2: "File with reads for mate 2, is available"
   refGenome: "path to fasta file for genome"
   jobMemory: "Memory allocated to this job"
+  timeout: "Timeout in hours for this task"
   threads: "Threads to use with bwa"
   cnv_file: "Output, contains ERCC ids and their respective number of reads"
   modules: "Names and versions of modules needed for alignment"
@@ -132,6 +137,7 @@ command <<<
 runtime {
   memory:  "~{jobMemory} GB"
   cpu: "~{threads}"
+  timeout: "~{timeout}"
   modules: "~{modules}"
 }
 
@@ -147,6 +153,7 @@ task rpkmTable {
 input {
   File erccCounts
   Int totalReads
+  Int timeout = 20
   Int jobMemory   = 10
   String modules  = "hg19-ercc/p13"
   String erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
@@ -156,6 +163,7 @@ parameter_meta {
   erccCounts: ".csv file with counts for ERCC transcripts"
   totalReads: "Total reads fot current sample, used to calculate RPKMs" 
   jobMemory: "Memory allocated to sort task"
+  timeout: "Timeout in hours for this task"
   modules: "Names and versions of modules needed for alignment"
   erccData: "Reference file from Agilent"
 }
@@ -205,6 +213,7 @@ command <<<
 
 runtime {
   memory:  "~{jobMemory} GB"
+  timeout: "~{timeout}"
   modules: "~{modules}"
 }
 

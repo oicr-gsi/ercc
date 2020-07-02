@@ -43,10 +43,13 @@ Paramter|Value
 ---|---
 ercc.countTranscripts.cnv_file | String (optional, default = "ercc_counts.csv")
 ercc.countTranscripts.jobMemory | Int (optional, default = 8 or 10 for computationally-intensive tasks)
+ercc.countTranscripts.timeout | Int (optional, default = 20 hours)
 ercc.rpkmTable.jobMemory | Int (optional, default = 10)
 ercc.makeReport.jobMemory | Int (optional, default = 10)
 ercc.countTranscripts.modules | String? (optional, default = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17")
+ercc.countTranscripts.timeout | Int (optional, default = 20 hours)
 ercc.rpkmTable.modules | String? (optional, default = "hg19-ercc/p13")
+ercc.rpkmTable.timeout | Int (optional, default = 20 hours)
 ercc.makeReport.modules | String? (optional, default = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13")
 ercc.countTranscripts.threads | Int (optional, default = 8)
 ercc.makeReport.imagingScriptPath | String? (optional, default = "$ERCC_SCRIPTS_ROOT/ercc_plots.R")

@@ -125,8 +125,10 @@ plotDoseResponse<-function(DATA,mix1,mix2,MAIN) {
   P[which(P$AMLOG==-Inf),2] = NA
   P[which(P$VCLOG==-Inf),3] = NA
   L<-with(P, lm(VCLOG~AMLOG))
-  
-  abline(L$coefficients[1], L$coefficients[2] , col="red", lty = 2) # regression line (y~x)
+  # regression line (y~x)
+  if (!is.na(L$coefficients[1]) && !is.na(L$coefficients[2])) {
+    abline(L$coefficients[1], L$coefficients[2] , col="red", lty = 2)
+  }
   # 1 RPKM line:
   abline(h = 0, col="gray60", lty = 2)
   R2<-cor(P$AMLOG, y=P$VCLOG, method = "pearson", use = "complete.obs")^2
@@ -180,7 +182,9 @@ plotFoldChange<-function(DATA,mix1,mix2,MAIN="Fold Change Response") {
   L<-with(POINTS, lm(FoldLog2~ExpFoldLog2, na.action = na.exclude))
   Icept = L$coefficients[1]
   # regression line (y~x)
-  abline(L$coefficients[1], L$coefficients[2] , col="red", lty = 2) 
+  if (!is.na(L$coefficients[1]) && !is.na(L$coefficients[2])) {
+    abline(L$coefficients[1], L$coefficients[2] , col="red", lty = 2)
+  }
   # 1 RPKM line:
   abline(h = 0, col="gray60", lty = 2)
   abline(v = 0, col="gray60", lty = 2)

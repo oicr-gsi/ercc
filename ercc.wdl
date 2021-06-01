@@ -4,7 +4,7 @@ workflow ercc {
 input {
   File fastqR1
   File? fastqR2
-  String? outputFileNamePrefix = basename(fastqR1, '.fastq.gz')
+  String outputFileNamePrefix = basename(fastqR1, '.fastq.gz')
   String mixId
   String sampleId
 }

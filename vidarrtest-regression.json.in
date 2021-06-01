@@ -1,0 +1,96 @@
+[
+    {
+        "arguments": {
+            "ercc.countTotal.jobMemory": null,
+            "ercc.countTotal.timeout": null,
+            "ercc.countTranscripts.cnv_file": null,
+            "ercc.countTranscripts.jobMemory": null,
+            "ercc.countTranscripts.modules": null,
+            "ercc.countTranscripts.refGenome": null,
+            "ercc.countTranscripts.threads": null,
+            "ercc.countTranscripts.timeout": null,
+            "ercc.fastqR1": {
+                "contents": {
+                    "configuration": "/.mounts/labs/gsi/testdata/ercc/fastq/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R1_001.fastq.gz",
+                    "externalIds": [
+                        {
+                            "id": "TEST",
+                            "provider": "TEST"
+                        }
+                    ]
+                },
+                "type": "EXTERNAL"
+            },
+            "ercc.fastqR2": {
+                "contents": {
+                    "configuration": "/.mounts/labs/gsi/testdata/ercc/fastq/SWID_12913657_GCMS_0019_St_P_PE_353_WT_NoGroup_181107_D00343_0247_BCD07KANXX_CAGATC_L007_R2_001.fastq.gz",
+                    "externalIds": [
+                        {
+                            "id": "TEST",
+                            "provider": "TEST"
+                        }
+                    ]
+                },
+                "type": "EXTERNAL"
+            },
+            "ercc.makeReport.controlData": null,
+            "ercc.makeReport.erccData": null,
+            "ercc.makeReport.imagingScriptPath": null,
+            "ercc.makeReport.jobMemory": null,
+            "ercc.makeReport.modules": null,
+            "ercc.makeReport.rScript": null,
+            "ercc.mixId": "ERCC Mix 2",
+            "ercc.outputFileNamePrefix": "TEST_GCMS_0019",
+            "ercc.rpkmTable.erccData": null,
+            "ercc.rpkmTable.jobMemory": null,
+            "ercc.rpkmTable.modules": null,
+            "ercc.rpkmTable.timeout": null,
+            "ercc.sampleId": "GCMS_0019"
+        },
+        "description": "Ercc workflow test",
+        "engineArguments": {},
+        "id": "GCMS_0019_DoseRespose",
+        "metadata": {
+            "ercc.image": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_ercc_GCMS_0019_DoseRespose_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "ercc.json": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_ercc_GCMS_0019_DoseRespose_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "ercc.pdf": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_ercc_GCMS_0019_DoseRespose_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "ercc.rpkmData": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_ercc_GCMS_0019_DoseRespose_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            }
+        },
+        "validators": [
+            {
+                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
+                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "output_metrics": "/.mounts/labs/gsi/testdata/ercc/output_metrics/GCMS_0019_DoseRespose.metrics",
+                "type": "script"
+            }
+        ]
+    }
+]

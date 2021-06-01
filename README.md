@@ -59,7 +59,7 @@ ercc.makeReport.Rscript | String? (optional, default = "$RSTATS_CAIRO_ROOT/bin/R
 
 Paramter|Value
 ---|---
-ercc.outputFileNamePrefix | String? (optional, will be a basename of the first input fastq if not customized)
+ercc.outputFileNamePrefix | String (optional, will be a basename of the first input fastq if not customized)
 ercc.mixId | String - need to specify Mix type as in MISO (ERCC Mix 1 or 2)
 ercc.fastqR1 | File - first (or the only in case of single-end data) fastq file
 ercc.sampleId | String - id of the input sample
@@ -73,30 +73,6 @@ ercc.fastqR2 | File? (optional) - second fastq file, optional in case of single-
   image - plot in .png format
   pdf   - plot in .pdf format
 
-```
-
-## Niassa + Cromwell
-
-This WDL workflow is wrapped in a Niassa workflow (https://github.com/oicr-gsi/pipedev/tree/master/pipedev-niassa-cromwell-workflow) so that it can used with the Niassa metadata tracking system (https://github.com/oicr-gsi/niassa).
-
-* Building
-```
-mvn clean install
-```
-
-* Testing
-```
-mvn clean verify \
--Djava_opts="-Xmx1g -XX:+UseG1GC -XX:+UseStringDeduplication" \
--DrunTestThreads=2 \
--DskipITs=false \
--DskipRunITs=false \
--DworkingDirectory=/path/to/tmp/ \
--DschedulingHost=niassa_oozie_host \
--DwebserviceUrl=http://niassa-url:8080 \
--DwebserviceUser=niassa_user \
--DwebservicePassword=niassa_user_password \
--Dcromwell-host=http://cromwell-url:8000
 ```
 
 ## Support

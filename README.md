@@ -59,7 +59,7 @@ ercc.makeReport.Rscript | String? (optional, default = "$RSTATS_CAIRO_ROOT/bin/R
 
 Paramter|Value
 ---|---
-ercc.outputFileNamePrefix | String? (optional, will be a basename of the first input fastq if not customized)
+ercc.outputFileNamePrefix | String (optional, will be a basename of the first input fastq if not customized)
 ercc.mixId | String - need to specify Mix type as in MISO (ERCC Mix 1 or 2)
 ercc.fastqR1 | File - first (or the only in case of single-end data) fastq file
 ercc.sampleId | String - id of the input sample

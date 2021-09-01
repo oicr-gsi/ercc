@@ -35,6 +35,13 @@ call makeReport {
     samples = if mixId == "ERCC Mix 1" then "~{sampleId} NA" else "NA ~{sampleId}"
 }
 
+parameter_meta {
+  fastqR1: "File with reads for mate 1 or fastq file for single-read data"
+  fastqR2: "File with reads for mate 2, is available"
+  outputFileNamePrefix: "Prefix for the output file"
+  mixId: "LIMS-approved identification of the Spike-In Mix"
+  sampleId: "The Id used to identify the data in the report"
+}
 
 output {
   File rpkmData = rpkmTable.rpkmTable

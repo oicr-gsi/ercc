@@ -1,80 +1,146 @@
 # ercc
 
-![ercc flowchart](docs/ercc_flowchart.png)
+Ercc 1.1, Niassa-wrapped Cromwell (widdle) workflow for running ERCC spike-in analysis on RNAseq data. The workflow counts total reads in fastq files, evaluate expression of ERCC spike-ins using bwa aligner and creates a report in .json format, along with plots in .png and .pdf formats. The .json file contains RPKMs for all ERCC transcripts as well as other information. RPKM table in .csv format is also provisioned.
+
+## Overview
+
+## Dependencies
+
+* [rstats-cairo 3.6](https://www.r-project.org/)
+* [bwa 0.7.17](http://bio-bwa.sourceforge.net/)
+* [samtools 0.1.19](http://www.htslib.org/)
+
 
 ## Usage
 
-## Cromwell
-
-``` 
- java -jar cromwell.jar run ercc.wdl --inputs inputs.json 
+### Cromwell
+```
+java -jar cromwell.jar run ercc.wdl --inputs inputs.json
 ```
 
-## Running Pipeline
+### Inputs
 
-```
+#### Required workflow parameters:
+Parameter|Value|Description
+---|---|---
+`fastqR1`|File|File with reads for mate 1 or fastq file for single-read data
+`mixId`|String|LIMS-approved identification of the Spike-In Mix
+`sampleId`|String|The Id used to identify the data in the report
+
+
+#### Optional workflow parameters:
+Parameter|Value|Default|Description
+---|---|---|---
+`fastqR2`|File?|None|File with reads for mate 2, is available
+`outputFileNamePrefix`|String|basename(fastqR1,'.fastq.gz')|Prefix for the output file
+
+
+#### Optional task parameters:
+Parameter|Value|Default|Description
+---|---|---|---
+`countTotal.jobMemory`|Int|8|Memory allocated to this job
+`countTotal.timeout`|Int|20|Timeout in hours for this task
+`countTranscripts.timeout`|Int|20|Timeout in hours for this task
+`countTranscripts.jobMemory`|Int|20|Memory allocated to this job
+`countTranscripts.threads`|Int|8|Threads to use with bwa
+`countTranscripts.refGenome`|String|"$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"|path to fasta file for genome
+`countTranscripts.cnv_file`|String|"ercc_counts.csv"|Output, contains ERCC ids and their respective number of reads
+`countTranscripts.modules`|String|"bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"|Names and versions of modules needed for alignment
+`rpkmTable.timeout`|Int|20|Timeout in hours for this task
+`rpkmTable.jobMemory`|Int|10|Memory allocated to sort task
+`rpkmTable.modules`|String|"hg19-ercc/p13"|Names and versions of modules needed for alignment
+`rpkmTable.erccData`|String|"$HG19_ERCC_ROOT/ERCC92.gtf"|Reference file from Agilent
+`makeReport.imagingScriptPath`|String|"$ERCC_SCRIPTS_ROOT/ercc_plots.R"|path to R script ercc_plots.R
+`makeReport.controlData`|String|"$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"|ERCC supporting data
+`makeReport.erccData`|String|"$HG19_ERCC_ROOT/ERCC92.gtf"|Reference file from Agilent
+`makeReport.rScript`|String|"$RSTATS_CAIRO_ROOT/bin/Rscript"|Path to Rscript command
+`makeReport.jobMemory`|Int|10|Memory allocated to classify task
+`makeReport.modules`|String|"rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"|Names and versions of modules needed for making report
+
+
+### Outputs
+
+Output | Type | Description
+---|---|---
+`rpkmData`|File|ERCC readouts in RPKMs
+`image`|File|png with a plot (Dose Response supported at the moment)
+`pdf`|File|pdf with the same plot as png, a legacy output
+`json`|File|json file with ERCC numbers
+
+
+## Commands
+ This section lists command(s) run by ercc workflow
  
- task countTotal:   procedure for counting reads in fastq file
+ * Running ercc
+ 
+ ercc workflow checks out spike-in signal (reads) and plots the QC graph(s).
+ 
+ Count reads in fastq file:
+ 
+ ```
+   zcat FASTQ_R1 | paste - - - - | wc -l  
+ 
+ ```
+ Align reads to chimeric reference (modified reference also containing all spike-in sequences)
+ 
+ ```
+   bwa mem -t THREADS -M REF_GENOME FASTQ_R1 FASTQ_R2 | samtools view -S - | 
+       cut -f 3 | grep ERCC | sort | uniq -c | sed s/^\ *// > CNV_FILE
+ ```
+ 
+ ```
+  In this custom script we build the RPKM table
+ 
+  python <<CODE
+  import os
+  ercc = os.path.expandvars("~{erccData}")
+  counts = "~{erccCounts}"
+  total = ~{totalReads}
+  output_file = "~{basename(erccCounts, '.csv')}_rpkm.csv"
+ 
+  # 1. Open file, read and collect length data
+  ercc_data = open(ercc, 'r')
+  length_hash = {}
+  for nextLine in ercc_data.readlines():
+      nextFields = nextLine.split("\t")
+      length_hash[nextFields[0]] = int(nextFields[4])
+  ercc_data.close()
+ 
+  # 2. Calculate RPKMs, put them in a hash
+  count_data = open(counts, 'r')
+  rpkm_hash = {}
+  count_hash = {}
+ 
+  for nextLine in count_data.readlines():
+      nextLine = nextLine.strip("\n")
+      countChunk = nextLine.split(" ")
+      if len(countChunk) == 2 and countChunk[1] in length_hash.keys():
+          count_hash[countChunk[1]] = int(countChunk[0])
+ 
+  pm = int(total)/1000000.0
+  for e in sorted(length_hash.keys()):
+     rpkm = 0.0
+     if e in count_hash.keys():
+         rpkm = count_hash[e]/pm/(length_hash[e]/1000.0)
+     rpkm_hash[e] = "{0:.2f}".format(rpkm)
+  count_data.close()
+ 
+  # 3. print out RPKMS sorted by
+  f = open(output_file, "w+")
+  for e in sorted(rpkm_hash.keys()):
+      f.write('\t'.join([e, rpkm_hash[e]]) + '\n')
+  f.close()
+  CODE
+ 
+ ```
+ 
+ Report Making using oputputs from the other steps:
+ 
+ ```
+  Rscript IMAGING_SCRIPT RPKM_TABLE CONTROL_DATA ERCC_DATA PREFIX DoseResponse SAMPLES
+ ```
+ ## Support
 
- task countTranscripts: procedure for counting ERCC transcripts, counts bwa-aligned reads with chimeric reference
+For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 
- task rpkmTable: this task produces rpkm counts using outputs from previous tasks
-
- task makeReport: making report and formatting results in json format
-
-```
-
-The workflow will accept paired or single-end sequencing data in fastq format. Assemblies for hg19 and hg38 are both supported. 
-
-## Optional Assembly-specific Parameters:
-
-hg19-specific data, for other assemblies these should be configured with olive:
-
-Paramter|Value
----|---
-ercc.countTranscripts.refGenome | String? (optional, default = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa")
-ercc.rpkmTable.erccData | String? (optional, default = "$HG19_ERCC_ROOT/ERCC92.gtf")
-ercc.makeReport.erccData | String? (optional, default = "$HG19_ERCC_ROOT/ERCC92.gtf")
-ercc.makeReport.controlData | String? (optional, default = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt")
-
-## Other Parameters with default values:
-
-Paramter|Value
----|---
-ercc.countTranscripts.cnv_file | String (optional, default = "ercc_counts.csv")
-ercc.countTranscripts.jobMemory | Int (optional, default = 8 or 10 for computationally-intensive tasks)
-ercc.countTranscripts.timeout | Int (optional, default = 20 hours)
-ercc.rpkmTable.jobMemory | Int (optional, default = 10)
-ercc.makeReport.jobMemory | Int (optional, default = 10)
-ercc.countTranscripts.modules | String? (optional, default = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17")
-ercc.countTranscripts.timeout | Int (optional, default = 20 hours)
-ercc.rpkmTable.modules | String? (optional, default = "hg19-ercc/p13")
-ercc.rpkmTable.timeout | Int (optional, default = 20 hours)
-ercc.makeReport.modules | String? (optional, default = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13")
-ercc.countTranscripts.threads | Int (optional, default = 8)
-ercc.makeReport.imagingScriptPath | String? (optional, default = "$ERCC_SCRIPTS_ROOT/ercc_plots.R")
-ercc.makeReport.Rscript | String? (optional, default = "$RSTATS_CAIRO_ROOT/bin/Rscript")
-
-## Required Inputs:
-
-Paramter|Value
----|---
-ercc.outputFileNamePrefix | String (optional, will be a basename of the first input fastq if not customized)
-ercc.mixId | String - need to specify Mix type as in MISO (ERCC Mix 1 or 2)
-ercc.fastqR1 | File - first (or the only in case of single-end data) fastq file
-ercc.sampleId | String - id of the input sample
-ercc.fastqR2 | File? (optional) - second fastq file, optional in case of single-end data
-
-## Outputs
-
-```
-  rpkmData  - rpkm numbers for a sample in csv format
-  json  - rpkm data in json format
-  image - plot in .png format
-  pdf   - plot in .pdf format
-
-```
-
-## Support
-
-For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca.
+_Generated with generate-markdown-readme (https://github.com/oicr-gsi/gsi-wdl-tools/)_

@@ -48,7 +48,10 @@
             "ercc.sampleId": "GCMS_0019"
         },
         "description": "Ercc workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+           "write_to_cache": false,
+           "read_from_cache": false
+        },
         "id": "GCMS_0019_DoseRespose",
         "metadata": {
             "ercc.image": {
@@ -86,8 +89,8 @@
         },
         "validators": [
             {
-                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
-                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+                "metrics_compare": "@CHECKOUT@/tests/compare.sh",
                 "output_metrics": "/.mounts/labs/gsi/testdata/ercc/output_metrics/GCMS_0019_DoseRespose.metrics",
                 "type": "script"
             }

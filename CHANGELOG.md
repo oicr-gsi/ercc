@@ -1,3 +1,5 @@
+## Unreleased - 2021-11-10
+[GP-2875](https://jira.oicr.on.ca/browse/GP-2875) Making RT scripts more robust
 ## 1.2 - 2021-06-01
  - Migration to Vidarr
 ## 1.2 - 2020-07-02

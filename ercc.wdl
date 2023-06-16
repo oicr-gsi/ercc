@@ -1,5 +1,15 @@
 version 1.0
 
+struct rccResources {
+ String name
+ String refBwaModule
+ String refFasta
+ String refGtf
+ String refModule
+ String controlData
+}
+
+
 workflow ercc {
 input {
   File fastqR1
@@ -7,6 +17,26 @@ input {
   String outputFileNamePrefix = basename(fastqR1, '.fastq.gz')
   String mixId
   String sampleId
+  String reference
+}
+
+Map[String, rccResources] resources = {
+ "hg19": {
+   "name": "hg19",
+   "refBwaModule": "hg19-ercc-bwa-index/0.7.17",
+   "refFasta": "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa",
+   "refGtf": "$HG19_ERCC_ROOT/ERCC92.gtf",
+   "refModule": "hg19-ercc/p13",
+   "controlData": "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
+ },
+ "hg38": {
+   "name": "hg38",
+   "refBwaModule": "hg38-ercc-bwa-index/0.7.17",
+   "refFasta": "$HG38_ERCC_BWA_INDEX_ROOT/hg38_random_ercc.fa",
+   "refGtf": "$HG38_ERCC_ROOT/ERCC92.gtf",
+   "refModule": "hg38-ercc/p12",
+   "controlData": "$HG38_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
+ }
 }
 
 call countTotal {
@@ -17,7 +47,9 @@ call countTotal {
 call countTranscripts { 
   input:
     fastqR1 = fastqR1,
-    fastqR2 = fastqR2
+    fastqR2 = fastqR2,
+    refGenome = resources[reference].refFasta,
+    modules = "bwa/0.7.17 samtools/0.1.19 ~{resources[reference].refBwaModule}"
 }
 
 Array[File] mateFiles = select_all([fastqR1,fastqR2])
@@ -25,19 +57,25 @@ Array[File] mateFiles = select_all([fastqR1,fastqR2])
 call rpkmTable {
   input:
     erccCounts = countTranscripts.erccCounts,
-    totalReads = if length(mateFiles) == 1 then countTotal.firstMateCounts else countTotal.firstMateCounts*2
+    totalReads = if length(mateFiles) == 1 then countTotal.firstMateCounts else countTotal.firstMateCounts*2,
+    modules  = resources[reference].refModule,
+    erccData = resources[reference].refGtf
 }
 
 call makeReport {
   input:
     rpkmTable = rpkmTable.rpkmTable,
     prefix = outputFileNamePrefix,
-    samples = if mixId == "ERCC Mix 1" then "~{sampleId} NA" else "NA ~{sampleId}"
+    samples = if mixId == "ERCC Mix 1" then "~{sampleId} NA" else "NA ~{sampleId}",
+    controlData = resources[reference].controlData,
+    erccData = resources[reference].refGtf,
+    modules  = "rstats-cairo/3.6 ercc-scripts/1.1 ~{resources[reference].refModule}"
 }
 
 parameter_meta {
   fastqR1: "File with reads for mate 1 or fastq file for single-read data"
   fastqR2: "File with reads for mate 2, is available"
+  reference: "hg19 or hg38 (assembly id)"
   outputFileNamePrefix: "Prefix for the output file"
   mixId: "LIMS-approved identification of the Spike-In Mix"
   sampleId: "The Id used to identify the data in the report"
@@ -120,9 +158,9 @@ input {
   Int timeout = 20
   Int jobMemory = 20
   Int threads = 8
-  String refGenome = "$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"
+  String refGenome
   String cnv_file = "ercc_counts.csv"
-  String modules = "bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"
+  String modules
 }
 
 parameter_meta {
@@ -162,8 +200,8 @@ input {
   Int totalReads
   Int timeout = 20
   Int jobMemory   = 10
-  String modules  = "hg19-ercc/p13"
-  String erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
+  String modules 
+  String erccData 
 }
 
 parameter_meta {
@@ -236,13 +274,13 @@ task makeReport {
 input {
   File rpkmTable
   String imagingScriptPath = "$ERCC_SCRIPTS_ROOT/ercc_plots.R"
-  String controlData = "$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"
-  String erccData = "$HG19_ERCC_ROOT/ERCC92.gtf"
+  String controlData
+  String erccData 
   String prefix = "UnnamedReport"
   String samples
   String rScript = "$RSTATS_CAIRO_ROOT/bin/Rscript"
   Int jobMemory = 10
-  String modules  = "rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"
+  String modules 
 }
 
 parameter_meta {

@@ -41,6 +41,7 @@
             "ercc.makeReport.rScript": null,
             "ercc.mixId": "ERCC Mix 2",
             "ercc.outputFileNamePrefix": "TEST_GCMS_0019",
+            "ercc.reference": "hg19",
             "ercc.rpkmTable.erccData": null,
             "ercc.rpkmTable.jobMemory": null,
             "ercc.rpkmTable.modules": null,

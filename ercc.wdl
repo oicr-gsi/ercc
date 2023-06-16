@@ -69,7 +69,7 @@ call makeReport {
     samples = if mixId == "ERCC Mix 1" then "~{sampleId} NA" else "NA ~{sampleId}",
     controlData = resources[reference].controlData,
     erccData = resources[reference].refGtf,
-    modules  = "rstats-cairo/3.6 ercc-scripts/1.1 ~{resources[reference].refModule}"
+    modules  = "rstats/4.0 ercc-scripts/1.1 ~{resources[reference].refModule}"
 }
 
 parameter_meta {
@@ -94,7 +94,7 @@ meta {
     description: "Ercc 1.1, Niassa-wrapped Cromwell (widdle) workflow for running ERCC spike-in analysis on RNAseq data. The workflow counts total reads in fastq files, evaluate expression of ERCC spike-ins using bwa aligner and creates a report in .json format, along with plots in .png and .pdf formats. The .json file contains RPKMs for all ERCC transcripts as well as other information. RPKM table in .csv format is also provisioned."
     dependencies: [
       {
-        name: "rstats-cairo/3.6",
+        name: "rstats/4.0",
         url: "https://www.r-project.org/"
       },
       {
@@ -278,7 +278,7 @@ input {
   String erccData 
   String prefix = "UnnamedReport"
   String samples
-  String rScript = "$RSTATS_CAIRO_ROOT/bin/Rscript"
+  String rScript = "$RSTATS_ROOT/bin/Rscript"
   Int jobMemory = 10
   String modules 
 }

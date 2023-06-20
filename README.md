@@ -26,6 +26,7 @@ Parameter|Value|Description
 `fastqR1`|File|File with reads for mate 1 or fastq file for single-read data
 `mixId`|String|LIMS-approved identification of the Spike-In Mix
 `sampleId`|String|The Id used to identify the data in the report
+`reference`|String|hg19 or hg38 (assembly id)
 
 
 #### Optional workflow parameters:
@@ -43,19 +44,12 @@ Parameter|Value|Default|Description
 `countTranscripts.timeout`|Int|20|Timeout in hours for this task
 `countTranscripts.jobMemory`|Int|20|Memory allocated to this job
 `countTranscripts.threads`|Int|8|Threads to use with bwa
-`countTranscripts.refGenome`|String|"$HG19_ERCC_BWA_INDEX_ROOT/hg19_random_ercc.fa"|path to fasta file for genome
 `countTranscripts.cnv_file`|String|"ercc_counts.csv"|Output, contains ERCC ids and their respective number of reads
-`countTranscripts.modules`|String|"bwa/0.7.17 samtools/0.1.19 hg19-ercc-bwa-index/0.7.17"|Names and versions of modules needed for alignment
 `rpkmTable.timeout`|Int|20|Timeout in hours for this task
 `rpkmTable.jobMemory`|Int|10|Memory allocated to sort task
-`rpkmTable.modules`|String|"hg19-ercc/p13"|Names and versions of modules needed for alignment
-`rpkmTable.erccData`|String|"$HG19_ERCC_ROOT/ERCC92.gtf"|Reference file from Agilent
 `makeReport.imagingScriptPath`|String|"$ERCC_SCRIPTS_ROOT/ercc_plots.R"|path to R script ercc_plots.R
-`makeReport.controlData`|String|"$HG19_ERCC_ROOT/ERCC_Controls_Analysis_v2.txt"|ERCC supporting data
-`makeReport.erccData`|String|"$HG19_ERCC_ROOT/ERCC92.gtf"|Reference file from Agilent
 `makeReport.rScript`|String|"$RSTATS_CAIRO_ROOT/bin/Rscript"|Path to Rscript command
 `makeReport.jobMemory`|Int|10|Memory allocated to classify task
-`makeReport.modules`|String|"rstats-cairo/3.6 ercc-scripts/1.1 hg19-ercc/p13"|Names and versions of modules needed for making report
 
 
 ### Outputs

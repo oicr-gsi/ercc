@@ -1,3 +1,5 @@
+## 1.1.0 - 2023-06-16
+ - Assembly-specific setting are moving inside the workflow
 ## Unreleased - 2021-11-10
 [GP-2875](https://jira.oicr.on.ca/browse/GP-2875) Making RT scripts more robust
 ## 1.2 - 2021-06-01

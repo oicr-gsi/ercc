@@ -107,11 +107,23 @@ meta {
       }
     ]
     output_meta: {
-      rpkmData: "ERCC readouts in RPKMs",
-      image: "png with a plot (Dose Response supported at the moment)",
-      pdf: "pdf with the same plot as png, a legacy output",
-      json: "json file with ERCC numbers"
+    rpkmData: {
+        description: "ERCC readouts in RPKMs",
+        vidarr_label: "rpkmData"
+    },
+    image: {
+        description: "png with a plot (Dose Response supported at the moment)",
+        vidarr_label: "image"
+    },
+    pdf: {
+        description: "pdf with the same plot as png, a legacy output",
+        vidarr_label: "pdf"
+    },
+    json: {
+        description: "json file with ERCC numbers",
+        vidarr_label: "json"
     }
+}
 }
 
 }

@@ -1,3 +1,5 @@
+## 1.2.0 - 2024-06-25
+[GRD-797](https://jira.oicr.on.ca/browse/GRD-797) - add vidarr labels to outputs (changes to medata only)
 ## 1.1.0 - 2023-06-16
  - Assembly-specific setting are moving inside the workflow
 ## Unreleased - 2021-11-10
